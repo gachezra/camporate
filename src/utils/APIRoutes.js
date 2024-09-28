@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://some-laws-tickle.loca.lt/api';
+const API_BASE_URL = 'https://campo-server.onrender.com';
 
 // auth routes
 export const registerRoute = `${API_BASE_URL}/register`
