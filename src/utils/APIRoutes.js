@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://campo-server.onrender.com';
+const API_BASE_URL = 'https://campo-server.onrender.com/api';
 
 // auth routes
 export const registerRoute = `${API_BASE_URL}/register`
