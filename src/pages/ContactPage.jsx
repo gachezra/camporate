@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 import { sendMessageRoute } from '../utils/APIRoutes';
 
 const ContactPage = () => {
@@ -106,10 +107,10 @@ const ContactPage = () => {
             <div className="mb-8">
               <h2 className="text-brown text-2xl font-bold mb-4">Connect With Us</h2>
               <div className="flex space-x-6 mb-6">
-                <a href="#" className="text-brown hover:text-light-brown transition duration-300"><FaFacebookF size={28} /></a>
-                <a href="#" className="text-brown hover:text-light-brown transition duration-300"><FaTwitter size={28} /></a>
-                <a href="#" className="text-brown hover:text-light-brown transition duration-300"><FaInstagram size={28} /></a>
-                <a href="#" className="text-brown hover:text-light-brown transition duration-300"><FaLinkedinIn size={28} /></a>
+                <a href="facebook.com/#" className="text-brown hover:text-light-brown transition duration-300"><FaFacebookF size={28} /></a>
+                <a href="x.com/#" className="text-brown hover:text-light-brown transition duration-300"><FaXTwitter size={28} /></a>
+                <a href="instagram.com/#" className="text-brown hover:text-light-brown transition duration-300"><FaInstagram size={28} /></a>
+                <a href="linkedin.com/#" className="text-brown hover:text-light-brown transition duration-300"><FaLinkedinIn size={28} /></a>
               </div>
               <div className="flex items-center mb-4">
                 <a href="tel:+254727684727" className="flex items-center text-brown hover:text-light-brown transition duration-300">

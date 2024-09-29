@@ -14,6 +14,8 @@ import ForumPage from './pages/Forums';
 import BranchDetails from './pages/BranchDetails';
 import AvatarCustomizer from './pages/AvatsrCustomizer';
 import ContactPage from './pages/ContactPage';
+import AboutUsPage from './pages/AboutUs';
+import PrivacyPolicyPage from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized/>} />
           <Route path="/admin-login" element={<AdminLogin/>} />
           <Route path="/contact" element={<ContactPage/>} />
+          <Route path="/about" element={<AboutUsPage/>} />
+          <Route path="/privacy" element={<PrivacyPolicyPage/>} />
           <Route path="/setup" element={<UniversitySetup/>} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
