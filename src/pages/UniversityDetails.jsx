@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { getUniversityDetails, reviewRoute } from '../utils/APIRoutes';
+import Lottie from 'lottie-react';
+import animationData from '../assets/book loading.json';
+import { getUniversityDetails, getBranchesRoute } from '../utils/APIRoutes';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const UniversityDetails = () => {
   const { universityId } = useParams();
   const [university, setUniversity] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUniversityDetails = async () => {
       try {
         const universityResponse = await axios.get(`${getUniversityDetails}/${universityId}`);
-        console.log(universityResponse.data)
         setUniversity(universityResponse.data);
 
-        // Fetch reviews specifically for this university
-        const reviewsResponse = await axios.get(`${reviewRoute}/${universityId}`);
-        setReviews(reviewsResponse.data);
+        const branchDetailsResponses = await axios.get(getBranchesRoute(universityId))
+        setBranches(branchDetailsResponses.data);
       } catch (error) {
         console.error('Error fetching university details:', error);
       } finally {
@@ -30,7 +32,11 @@ const UniversityDetails = () => {
   }, [universityId]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">
+      <Lottie
+        animationData={animationData}
+      />
+  </div>;
   }
 
   if (!university) {
@@ -38,43 +44,57 @@ const UniversityDetails = () => {
   }
 
   return (
-    <div className="p-6 bg-cream min-h-screen">
-      <h1 className="text-brown text-center text-4xl font-extrabold mb-8">{university.name}</h1>
-      
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-brown mb-4">University Information</h2>
-        <p className="text-lg mb-2"><strong>Location:</strong> {university.location}</p>
-        <p className="text-lg mb-2"><strong>Programs Offered:</strong> {university.programs_offered.join(', ')}</p>
-        <p className="text-lg mb-2"><strong>Website:</strong> <a href={university.website} className="text-blue-500 underline">{university.website}</a></p>
-        <p className="text-lg mb-2"><strong>Description:</strong> {university.description}</p>
-        <p className="text-lg mb-2"><strong>Overall Rating:</strong> {university.overall_rating}</p>
-      </div>
+    <div className="bg-cream min-h-full">
+      <Header />
+      <h1 className="text-brown text-center text-2xl font-extrabold mb-6">{university.name}</h1>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-brown mb-4">Reviews</h2>
-        {reviews.length > 0 ? (
-          <ul>
-            {reviews.map((review, index) => (
-              <li key={index} className="mb-6 p-5 bg-white rounded-lg shadow-lg">
-                <div className="flex justify-between items-center mb-3">
-                  <p className="font-bold text-xl text-brown">Overall Rating: {review.overall_rating}</p>
-                  <p className="text-sm text-gray-500">By: {review.user_id.username}</p>
+      <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+        <h2 className="text-lg font-semibold text-brown mb-4 text-center">University Information</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <p className="mb-2"><strong>Location:</strong> {university.location}</p>
+            <p className="mb-2"><strong>Programs Offered:</strong> {university.programs_offered.join(', ')}</p>
+            <p className="mb-2"><strong>Website:</strong> <a href={university.website} className="text-blue-500 underline">{university.website}</a></p>
+            <p className="mb-2"><strong>Description:</strong> {university.description}</p>
+          </div>
+          <div>
+            <p className="mb-2"><strong>Overall Rating:</strong> ⭐ {university.overall_rating.toFixed(1)}/5</p>
+            <p className="mb-2"><strong>Academic Rating:</strong> ⭐ {university.academic_rating.toFixed(1)}/5</p>
+            <p className="mb-2"><strong>Facilities Rating:</strong> ⭐ {university.facilities_rating.toFixed(1)}/5</p>
+            <p className="mb-2"><strong>Social Life Rating:</strong> ⭐ {university.social_life_rating.toFixed(1)}/5</p>
+            <p className="mb-2"><strong>Career Prospects Rating:</strong> ⭐ {university.career_prospects_rating.toFixed(1)}/5</p>
+            <p className="mb-2"><strong>Cost of Living:</strong> ${university.cost_of_living}</p>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold text-brown mb-2">Branches</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {branches.map((branch) => (
+              <Link to={`${branch._id}`} className='cursor-pointer'>
+                <div key={branch._id} className="bg-cream p-4 rounded-lg shadow-md">
+                  <h4 className="text-lg font-semibold text-brown mb-2">{branch.name}</h4>
+                  <p className="mb-1"><strong>Location:</strong> {branch.location}</p>
+                  <p className="mb-1"><strong>Programs:</strong> {branch.programs_offered.join(', ')}</p>
+                  <p className="mb-1"><strong>Contact:</strong> {branch.contact}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <p><strong>Academic:</strong> {review.academic_rating}</p>
-                  <p><strong>Facilities:</strong> {review.facilities_rating}</p>
-                  <p><strong>Social Life:</strong> {review.social_life_rating}</p>
-                  <p><strong>Career Prospects:</strong> {review.career_prospects_rating}</p>
-                  <p><strong>Cost of Living:</strong> {review.cost_of_living}</p>
-                </div>
-                <p className="mt-4 text-lg">{review.comment}</p>
-              </li>
+              </Link>
             ))}
-          </ul>
-        ) : (
-          <p className="text-lg text-gray-700">No reviews yet.</p>
-        )}
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold text-brown mb-2">Image Gallery</h3>
+          <div className="flex space-x-4 overflow-x-auto">
+            {branches.map((branch, index) => (
+              <Link to={`${branch._id}`} className='cursor-pointer'>
+                <img key={index} src={branch.image_gallery} alt={`University ${index + 1}`} className="w-40 h-40 object-cover rounded-md" />
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };

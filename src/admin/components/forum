@@ -1,0 +1,153 @@
+import React, { useState } from 'react';
+
+const ForumManagement = () => {
+  const [topics, setTopics] = useState([
+    { id: 1, title: 'Upcoming Events', posts: 5 },
+    { id: 2, title: 'Student Life', posts: 12 },
+  ]);
+
+  return (
+    <div className="bg-cream p-6 rounded-lg shadow-lg">
+      <h2 className="text-xl font-semibold mb-4">Manage Forums</h2>
+      <ul className="space-y-4 mb-6">
+        {topics.map((topic) => (
+          <li key={topic.id} className="p-4 bg-light-cream border border-light-brown rounded-lg">
+            <p><strong>{topic.title}</strong> - {topic.posts} posts</p>
+            <div className="mt-2 space-x-2">
+              <button className="px-4 py-2 bg-brown text-cream rounded-lg hover:bg-light-brown">Edit</button>
+              <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Delete</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <form className="space-y-4">
+        <h3 className="text-lg font-semibold">Add New Topic</h3>
+        <input
+          type="text"
+          placeholder="Topic Title"
+          className="w-full p-3 border border-light-brown rounded-lg"
+        />
+        <button type="submit" className="px-4 py-2 bg-brown text-cream rounded-lg hover:bg-light-brown">
+          Add Topic
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default ForumManagement;
+import React, { useState } from 'react';
+import { FaArrowUp, FaArrowDown, FaComment, FaEdit, FaTrash } from 'react-icons/fa';
+import { MdAddCircleOutline } from 'react-icons/md';
+import { IoIosArrowForward } from 'react-icons/io';
+
+const ForumPage = () => {
+  // Mock data for threads and posts; replace with actual data from your backend
+  const threads = [
+    {
+      id: '1',
+      title: 'What is your favorite programming language?',
+      description: 'Share your thoughts on why you prefer it!',
+      author: 'JohnDoe',
+      createdAt: '2 hours ago',
+      posts: [
+        {
+          id: '1a',
+          content: 'I love JavaScript because of its flexibility and community support!',
+          author: 'JaneSmith',
+          upvotes: 15,
+          downvotes: 2,
+          replies: [
+            {
+              id: '1a1',
+              content: 'Totally agree! JavaScript is awesome for web development.',
+              author: 'DevGuy',
+              upvotes: 10,
+              downvotes: 1,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  // Handle upvote/downvote functions (implement the logic)
+  const handleVote = (postId, type) => {
+    console.log(`Voted ${type} on post ${postId}`);
+  };
+
+  // Handle editing/deleting (implement the logic)
+  const handleEdit = (postId) => {
+    console.log(`Edit post ${postId}`);
+  };
+
+  const handleDelete = (postId) => {
+    console.log(`Delete post ${postId}`);
+  };
+
+  // Render a single post and its nested replies
+  const renderPost = (post, level = 0) => (
+    <div className={`pl-${level * 4} py-2 border-l-4 border-brown-light`}>
+      <div className="flex items-start space-x-2">
+        <div className="flex flex-col items-center text-brown-dark">
+          <FaArrowUp
+            className="cursor-pointer hover:text-brown"
+            onClick={() => handleVote(post.id, 'upvote')}
+          />
+          <p className="text-sm font-bold">{post.upvotes - post.downvotes}</p>
+          <FaArrowDown
+            className="cursor-pointer hover:text-brown"
+            onClick={() => handleVote(post.id, 'downvote')}
+          />
+        </div>
+        <div className="bg-cream rounded-lg p-3 shadow-md flex-1">
+          <div className="flex justify-between items-center">
+            <p className="font-semibold text-brown-dark">{post.author}</p>
+            <div className="flex space-x-2 text-brown-dark">
+              <FaEdit
+                className="cursor-pointer hover:text-brown"
+                onClick={() => handleEdit(post.id)}
+              />
+              <FaTrash
+                className="cursor-pointer hover:text-brown"
+                onClick={() => handleDelete(post.id)}
+              />
+            </div>
+          </div>
+          <p className="text-brown">{post.content}</p>
+          <div className="flex items-center space-x-2 mt-2 text-sm text-brown-dark">
+            <FaComment className="inline" />
+            <span>{post.replies.length} replies</span>
+            <IoIosArrowForward className="inline cursor-pointer hover:text-brown" />
+          </div>
+        </div>
+      </div>
+      {post.replies.map((reply) => renderPost(reply, level + 1))}
+    </div>
+  );
+
+  return (
+    <div className="max-w-5xl mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-brown-dark">Forum Discussions</h1>
+        <MdAddCircleOutline className="text-3xl text-brown cursor-pointer hover:text-brown-light" />
+      </div>
+      <div className="space-y-6">
+        {threads.map((thread) => (
+          <div key={thread.id} className="bg-cream p-4 rounded-lg shadow-lg">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-brown-dark">{thread.title}</h2>
+              <p className="text-brown-light">{thread.description}</p>
+              <p className="text-sm text-brown-dark mt-1">Posted by {thread.author} | {thread.createdAt}</p>
+            </div>
+            <div className="space-y-4">
+              {thread.posts.map((post) => renderPost(post))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ForumPage;

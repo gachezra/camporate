@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getUniversityNamesRoute, schoolEmailRoute, getProgramsRoute } from '../utils/APIRoutes';
+import { getUniversityNamesRoute, schoolEmailRoute, getProgramsRoute, getBranchesRoute } from '../utils/APIRoutes';
 
 const UniversityForm = ({ onClose, onUniversityAdded }) => {
   const [universities, setUniversities] = useState([]);
   const [programs, setPrograms] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [formData, setFormData] = useState({
     universityId: '',
+    branchId: '',
     program: '',
     schoolEmail: '',
   });
@@ -28,10 +30,28 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
   }, []);
 
   useEffect(() => {
-    const fetchPrograms = async () => {
+    const fetchBranches = async () => {
       if (formData.universityId) {
         try {
-          const response = await axios.get(`${getProgramsRoute}/${formData.universityId}`);
+          const branches = await axios.get(getBranchesRoute(formData.universityId))
+          setBranches(branches.data);
+        } catch (error) {
+          console.error('Error fetching branches:', error);
+          setNotification(error.response.data.error);
+        }
+      } else {
+        setBranches([]);
+      }
+    }
+    fetchBranches();
+  }, [formData.universityId]);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      if (formData.branchId) {
+        try {
+          const response = await axios.get(getProgramsRoute(formData.branchId));
+          console.log(response.data)
           setPrograms(response.data);
         } catch (error) {
           console.error('Error fetching programs:', error);
@@ -43,7 +63,7 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
     };
 
     fetchPrograms();
-  }, [formData.universityId]);
+  }, [formData.branchId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,31 +71,46 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
 
     // Reset the program selection when the university changes
     if (name === 'universityId') {
-      setFormData((prev) => ({ ...prev, program: '' }));
+      setFormData((prev) => ({ ...prev, program: '', branchId: ''  }));
     }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setNotification('');
+  e.preventDefault();
+  setLoading(true);
+  setNotification('');
 
-    try {
-      const response = await axios.post(schoolEmailRoute, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        }
-      });
+  try {
+    const response = await axios.post(schoolEmailRoute, formData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      }
+    });
+
+    if (response.status === 400 && response.data.error) {
+      setNotification(response.data.error);
+    } else {
       setNotification(response.data.message || 'University and email added successfully!');
       onUniversityAdded();
       onClose();
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setNotification('Failed to submit the form. Please try again.');
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Error submitting form:', error);
+
+    // Handle the error as needed
+    if (error.response && error.response.status === 400) {
+      // Handle 400 Bad Request error
+      setNotification(error.response.data.error);
+      console.log('Bad Request error:', error.response.data);
+    } else {
+      // Handle other errors
+      setNotification('Failed to submit the form. Please try again.');
+      console.log('Error:', error);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -100,6 +135,24 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
               {universities.map((university) => (
                 <option key={university._id} value={university._id}>
                   {university.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[#A58A6F] mb-1">Select Branch:</label>
+            <select
+              name="branchId"
+              value={formData.branchId}
+              onChange={handleChange}
+              required
+              disabled={!branches.length}
+              className="w-full px-3 py-2 border border-[#C3A287] rounded focus:outline-none focus:ring focus:ring-[#C3A287] transition duration-300"
+            >
+              <option value="">-- Select a Branch --</option>
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name}
                 </option>
               ))}
             </select>

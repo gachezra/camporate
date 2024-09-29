@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { updateUserRoute } from '../utils/APIRoutes';
 import axios from 'axios';
 
-const EditProfileForm = ({ user, onClose, onUpdate }) => {
+const EditProfileForm = ({ user, onClose, onUpdate, avatarEdit }) => {
   const userId = localStorage.getItem('uid');
   const token = localStorage.getItem('token');
   const [formData, setFormData] = useState({
@@ -42,6 +42,7 @@ const EditProfileForm = ({ user, onClose, onUpdate }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-cream rounded-lg p-5 w-80">
         <h2 className="text-brown text-center mb-5 text-2xl font-bold">Edit Profile</h2>
+        <p onClick={avatarEdit}><span className='font-bold text-brown mb-2 cursor-pointer'>Edit Avatar</span></p>
         <form onSubmit={handleSubmit} className="flex flex-col">
           <label className="text-light-brown mb-1">Username:</label>
           <input
