@@ -104,7 +104,7 @@ const UniversityManagement = ({userId}) => {
           <p><strong>Email Domain:</strong> {university.emailDomain}</p>
           <p><strong>Academic Rating:</strong> {university.academic_rating}</p>
           <p><strong>Career Prospects Rating:</strong> {university.career_prospects_rating}</p>
-          <p><strong>Cost of Living:</strong> {university.cost_of_living}</p>
+          <p><strong>Cost of Living:</strong> Ksh.{university.cost_of_living} per day</p>
           <p><strong>Facilities Rating:</strong> {university.facilities_rating}</p>
           <p><strong>Overall Rating:</strong> {university.overall_rating}</p>
           <p><strong>Social Life Rating:</strong> {university.social_life_rating}</p>

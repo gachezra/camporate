@@ -5,6 +5,9 @@ export const registerRoute = `${API_BASE_URL}/register`
 export const loginRoute = `${API_BASE_URL}/login`
 export const verifyEmailRoute = `${API_BASE_URL}/verify-email`
 
+//contact page
+export const sendMessageRoute = `${API_BASE_URL}/sendMessage`
+
 //profile
 export const getUserProfileRoute = `${API_BASE_URL}/profile`
 export const updateUserRoute = `${API_BASE_URL}/update`

@@ -121,7 +121,7 @@ const BranchData = ({ userId }) => {
               <p>Career Prospects: {branch.career_prospects_rating || 'N/A'}</p>
               <p>Facilities: {branch.facilities_rating || 'N/A'}</p>
               <p>Social Life: {branch.social_life_rating || 'N/A'}</p>
-              <p>Cost of Living: {branch.cost_of_living || 'N/A'}</p>
+              <p>Cost of Living: Ksh.{branch.cost_of_living || 'N/A'} per day</p>
               <p>Overall: {branch.overall_rating || 'N/A'}</p>
             </div>
             <div>

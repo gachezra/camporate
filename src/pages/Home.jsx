@@ -72,7 +72,7 @@ const Home = () => {
         </section>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center h-64 mt-7">
             <Lottie animationData={animationData} />
           </div>
         ) : (

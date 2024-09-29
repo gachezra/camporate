@@ -63,7 +63,7 @@ const UniversityDetails = () => {
             <p className="mb-2"><strong>Facilities Rating:</strong> ⭐ {university.facilities_rating.toFixed(1)}/5</p>
             <p className="mb-2"><strong>Social Life Rating:</strong> ⭐ {university.social_life_rating.toFixed(1)}/5</p>
             <p className="mb-2"><strong>Career Prospects Rating:</strong> ⭐ {university.career_prospects_rating.toFixed(1)}/5</p>
-            <p className="mb-2"><strong>Cost of Living:</strong> ${university.cost_of_living}</p>
+            <p className="mb-2"><strong>Cost of Living:</strong> Ksh.{university.cost_of_living} per day</p>
           </div>
         </div>
 

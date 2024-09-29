@@ -13,6 +13,7 @@ import UniversitySetup from './admin/pages/UniversitySetup';
 import ForumPage from './pages/Forums';
 import BranchDetails from './pages/BranchDetails';
 import AvatarCustomizer from './pages/AvatsrCustomizer';
+import ContactPage from './pages/ContactPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="setAvatar" element={<AvatarCustomizer/>} />
           <Route path="/unauthorized" element={<Unauthorized/>} />
           <Route path="/admin-login" element={<AdminLogin/>} />
+          <Route path="/contact" element={<ContactPage/>} />
           <Route path="/setup" element={<UniversitySetup/>} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
