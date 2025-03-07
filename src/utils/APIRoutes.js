@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://effective-barnacle-g6vqw575wvjfwj6x-27684.app.github.dev/api';
+const API_BASE_URL = 'https://campo-server.onrender.com/api';
 
 // auth routes
 export const registerRoute = `${API_BASE_URL}/register`
