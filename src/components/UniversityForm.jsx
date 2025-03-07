@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getUniversityNamesRoute, schoolEmailRoute, getProgramsRoute, getBranchesRoute } from '../utils/APIRoutes';
 
-const UniversityForm = ({ onClose, onUniversityAdded }) => {
+const UniversityForm = ({ onClose }) => {
   const [universities, setUniversities] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -91,7 +91,6 @@ const UniversityForm = ({ onClose, onUniversityAdded }) => {
       setNotification(response.data.error);
     } else {
       setNotification(response.data.message || 'University and email added successfully!');
-      onUniversityAdded();
       onClose();
     }
   } catch (error) {

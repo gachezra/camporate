@@ -51,6 +51,7 @@ const AdminSidebar = ({ setActiveSection, activeSection }) => {
       <div
         className={`flex items-center gap-4 cursor-pointer rounded-lg hover:bg-red-600 transition p-2`}
         onClick={() => logOut()}
+        title='Log Out'
       >
         <FaSignOutAlt className="text-lg text-red-500" />
         {isOpen && <span>Logout</span>}

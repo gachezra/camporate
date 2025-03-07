@@ -16,25 +16,34 @@ const AdminPage = () => {
   const uid = localStorage.getItem('uid');
   const token = localStorage.getItem('token');
 
-  const roleCheck = useCallback( async () => {
-    const res = await axios.get(`${getUserProfileRoute}/${uid}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const universityNotVerified = res.data.universities.some(university => !university.isVerified);
-
-    if (res.data.role !== 'admin') {
+  const roleCheck = useCallback(async () => {
+    try {
+      const res = await axios.get(`${getUserProfileRoute}/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const universityNotVerified = res.data.universities.some(
+        (university) => !university.isVerified
+      );
+  
+      if (res.data.role !== 'admin') {
+        history('/unauthorized');
+        return;
+      }
+  
+      if (res.data.universities.length === 0) {
+        history('/setup');
+        return;
+      }
+  
+      if (universityNotVerified) {
+        history('/verify');
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error);
       history('/unauthorized');
-    }
-
-    if (res.data.universities.length === 0) {
-      history('/setup');
-    }
-
-    if (universityNotVerified) {
-      history('/verify');
     }
   }, [history, uid, token]);
 
