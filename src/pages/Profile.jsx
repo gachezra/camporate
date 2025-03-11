@@ -46,16 +46,18 @@ const Profile = () => {
         return;
       }
 
-      const avatar = localStorage.getItem('isAvatarSet');
-
-      if (!avatar) {
-        navigate('/setAvatar');
-      }
-
       try {
         const response = await axios.get(`${getUserProfileRoute}/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        console.log('User data: ', response.data)
+
+        const avatar = localStorage.getItem('isAvatarSet');
+  
+        if (!avatar) {
+          navigate('/setAvatar');
+        }
         
         setUser(response.data);
       } catch (error) {

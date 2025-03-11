@@ -32,6 +32,8 @@ const BranchDetails = () => {
         axios.get(reviewRoute(universityId, branchId))
       ]);
 
+      console.log(branchResponse.data, reviewsResponse.data)
+
       setBranch(branchResponse.data);
       setReviews(reviewsResponse.data);
     } catch (error) {
@@ -205,7 +207,7 @@ const BranchDetails = () => {
                     </p>
                     <div className="text-sm text-gray-500 space-y-1 sm:space-y-0 sm:ml-4">
                     <p>Posted on: {new Date(review.date).toLocaleDateString()}</p>
-                    <p>By: {review.user_id.username}</p>
+                    <p>By: {review.user_id?.username}</p>
                     </div>
                 </div>
 
