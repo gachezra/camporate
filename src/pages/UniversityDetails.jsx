@@ -101,19 +101,19 @@ const UniversityDetails = () => {
             </div>
             <div>
               {university.overall_rating !== undefined && (
-                <p className="mb-2"><strong>Overall Rating:</strong> ⭐ {(university.overall_rating || 0).toFixed(1)}/5</p>
+                <p className="mb-2"><strong>Overall Rating:</strong> ⭐ {(university.overall_rating || 0).toFixed(1)}/10</p>
               )}
               {university.academic_rating !== undefined && (
-                <p className="mb-2"><strong>Academic Rating:</strong> ⭐ {(university.academic_rating || 0).toFixed(1)}/5</p>
+                <p className="mb-2"><strong>Academic Rating:</strong> ⭐ {(university.academic_rating || 0).toFixed(1)}/10</p>
               )}
               {university.facilities_rating !== undefined && (
-                <p className="mb-2"><strong>Facilities Rating:</strong> ⭐ {(university.facilities_rating || 0).toFixed(1)}/5</p>
+                <p className="mb-2"><strong>Facilities Rating:</strong> ⭐ {(university.facilities_rating || 0).toFixed(1)}/10</p>
               )}
               {university.social_life_rating !== undefined && (
-                <p className="mb-2"><strong>Social Life Rating:</strong> ⭐ {(university.social_life_rating || 0).toFixed(1)}/5</p>
+                <p className="mb-2"><strong>Social Life Rating:</strong> ⭐ {(university.social_life_rating || 0).toFixed(1)}/10</p>
               )}
               {university.career_prospects_rating !== undefined && (
-                <p className="mb-2"><strong>Career Prospects Rating:</strong> ⭐ {(university.career_prospects_rating || 0).toFixed(1)}/5</p>
+                <p className="mb-2"><strong>Career Prospects Rating:</strong> ⭐ {(university.career_prospects_rating || 0).toFixed(1)}/10</p>
               )}
               {university.cost_of_living !== undefined && (
                 <p className="mb-2"><strong>Cost of Living:</strong> Ksh.{university.cost_of_living || 0} per day</p>
