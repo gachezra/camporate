@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
-import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaCheck, FaTimes, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa'; // Added icons
 import { getUserProfileRoute, getBranchRoute, updateBranchRoute } from '../../utils/APIRoutes';
 
 // Debounce delay in milliseconds
@@ -11,13 +11,15 @@ const BranchData = ({ userId }) => {
     _id: '',
     name: '',
     location: '',
+    phone: '', // Added phone
+    email: '', // Added email
     academic_rating: 0,
     career_prospects_rating: 0,
     cost_of_living: 0,
     facilities_rating: 0,
-    image_gallery: [], // Keep as array
+    image_gallery: [],
     overall_rating: 0,
-    programs_offered: [], // Keep as array
+    programs_offered: [],
     social_life_rating: '',
   });
   const [isEditing, setIsEditing] = useState(false);
@@ -26,6 +28,8 @@ const BranchData = ({ userId }) => {
       ...branch,
       programs_offered: [],
       image_gallery: [],
+      phone: '', // Added phone
+      email: '', // Added email
   });
   const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [error, setError] = useState(null); // Add error state
@@ -35,14 +39,19 @@ const BranchData = ({ userId }) => {
 
   // --- Data Fetching ---
   const fetchBranch = useCallback(async (branchId) => {
-    if (!branchId) return null; // Handle case where no branchId is found
+    if (!branchId) return null;
     try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Authentication token not found.");
         const { data } = await axios.get(getBranchRoute(branchId), {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return data;
+        // Ensure default empty strings if data is missing
+        return {
+            ...data,
+            phone: data.phone || '',
+            email: data.email || '',
+        };
     } catch (err) {
         console.error("Error fetching branch details:", err);
         setError("Failed to fetch branch details.");
@@ -51,24 +60,18 @@ const BranchData = ({ userId }) => {
   }, []);
 
   const fetchBranchId = useCallback(async () => {
-    if (!userId) return null; // Handle case where no userId is provided
+    if (!userId) return null;
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Authentication token not found.");
       const { data } = await axios.get(`${getUserProfileRoute}/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      // Assuming the user profile links to universities, and each has ONE branch ID
-      // If a user can have multiple branches, this logic needs adjustment.
-      // Taking the first branch found for this example.
       const firstBranchId = data?.universities?.[0]?.branch;
       if (!firstBranchId) {
           console.log("No associated branch found for this user.");
-          // Decide how to handle this - maybe show a message or allow creating one?
       }
-      return firstBranchId; // Return only the first branch ID found
-
+      return firstBranchId;
     } catch (err) {
       console.error("Error fetching user profile/branch ID:", err);
       setError("Failed to fetch user profile or associated branch.");
@@ -85,20 +88,18 @@ const BranchData = ({ userId }) => {
           const branchDeets = await fetchBranch(branchId);
           if (branchDeets) {
             setBranch(branchDeets);
-            // Initialize formData correctly, ensuring arrays are handled
+            // Initialize formData correctly, including new fields
             setFormData({
                 ...branchDeets,
-                // Convert arrays to comma-separated strings for the input fields
                 programs_offered: Array.isArray(branchDeets.programs_offered) ? branchDeets.programs_offered.join(', ') : '',
                 image_gallery: Array.isArray(branchDeets.image_gallery) ? branchDeets.image_gallery.join(', ') : '',
+                // phone and email should already be strings from fetchBranch
             });
           } else {
-              // Handle case where branch details couldn't be fetched for a valid ID
               setError("Branch details found but could not be loaded.");
           }
         } else {
-            // Handle case where no branch ID was found for the user
-            setBranch(prev => ({ ...prev, name: 'No Branch Assigned' })); // Update UI appropriately
+            setBranch(prev => ({ ...prev, name: 'No Branch Assigned' }));
             setFormData(prev => ({ ...prev, name: 'No Branch Assigned' }));
         }
       })
@@ -110,13 +111,12 @@ const BranchData = ({ userId }) => {
           setIsLoading(false);
       });
 
-    // Cleanup function for the debounce timer on component unmount
     return () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [fetchBranchId, fetchBranch, userId]); // Rerun if userId changes
+  }, [fetchBranchId, fetchBranch, userId]);
 
   // --- Edit Mode Toggle ---
   const handleEditClick = () => {
@@ -128,7 +128,7 @@ const BranchData = ({ userId }) => {
               image_gallery: Array.isArray(branch.image_gallery) ? branch.image_gallery.join(', ') : '',
           });
       } else {
-          // Entering edit mode, formData is already set (or should be based on 'branch')
+          // Entering edit mode, sync formData with current branch state
            setFormData({
                ...branch,
                programs_offered: Array.isArray(branch.programs_offered) ? branch.programs_offered.join(', ') : '',
@@ -142,134 +142,94 @@ const BranchData = ({ userId }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Update formData state immediately for input responsiveness
-    const newFormData = {
-        ...formData,
-        [name]: value,
-    };
+    // Update formData state immediately
+    const newFormData = { ...formData, [name]: value };
     setFormData(newFormData);
 
     // --- Debounced Update Logic for Arrays ---
     if (name === 'programs_offered' || name === 'image_gallery') {
-      // Clear existing timer
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
-
-      // Set a new timer
       debounceTimeoutRef.current = setTimeout(async () => {
-        // Only proceed if we have a branch ID and user ID
         if (!branch._id || !userId) {
           console.error("Cannot update: Branch ID or User ID is missing.");
-          // Optionally show an error message to the user
           return;
         }
-
-        // Parse the comma-separated string from the input field into an array
-        const itemsArray = value
-          .split(',')
-          .map((item) => item.trim())
-          .filter((item) => item); // Remove empty strings
-
-        // Prepare the data payload for the specific field
+        const itemsArray = value.split(',').map((item) => item.trim()).filter((item) => item);
         const updatePayload = { [name]: itemsArray };
-
         try {
           const token = localStorage.getItem('token');
           if (!token) throw new Error("Authentication token not found.");
-
-          console.log(`Debounced update for ${name}:`, updatePayload); // Debug log
-
-          // Make the API call to update just this field
+          console.log(`Debounced update for ${name}:`, updatePayload);
           await axios.post(updateBranchRoute(branch._id, userId), updatePayload, {
             headers: { Authorization: `Bearer ${token}` },
           });
-
           console.log(`Successfully updated ${name} via debounce.`);
-          // Optionally update the main 'branch' state here if needed immediately,
-          // but be cautious about potential race conditions if user types fast.
-          // It might be better to rely on the final submit or a refetch.
-          // Example: setBranch(prev => ({ ...prev, ...updatePayload }));
-
         } catch (error) {
           console.error(`Error updating ${name} on the fly:`, error);
-          // Optionally show an error notification to the user
           setError(`Failed to auto-update ${name}. Please try saving the form.`);
         }
       }, DEBOUNCE_DELAY);
     }
+    // No debounce for phone/email/location/name - these update on final submit
   };
 
   // --- Form Submission Handler ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
 
-    // Clear any pending debounce timer before final submit
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
 
-    // Ensure we have the necessary IDs
     if (!branch._id || !userId) {
       console.error("Cannot submit: Branch ID or User ID is missing.");
       setError("Cannot save data: Branch or User information is missing.");
       return;
     }
 
-    // Parse array fields from formData strings correctly
-    const programsArray = formData.programs_offered
-                            .split(',')
-                            .map(item => item.trim())
-                            .filter(Boolean); // Ensure empty strings are removed
-    const imagesArray = formData.image_gallery
-                            .split(',')
-                            .map(item => item.trim())
-                            .filter(Boolean); // Ensure empty strings are removed
+    // Parse array fields
+    const programsArray = formData.programs_offered.split(',').map(item => item.trim()).filter(Boolean);
+    const imagesArray = formData.image_gallery.split(',').map(item => item.trim()).filter(Boolean);
 
-    // Prepare the final data payload
+    // Prepare the final data payload including new fields
     const finalDataToSend = {
       name: formData.name,
       location: formData.location,
+      phone: formData.phone, // Add phone
+      email: formData.email, // Add email
       programs_offered: programsArray,
       image_gallery: imagesArray,
-      // Include other fields from formData if they are meant to be editable
-      // Example: if ratings were editable:
-      // academic_rating: formData.academic_rating,
+      // Include other editable fields if necessary (e.g., ratings if they become editable)
     };
 
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Authentication token not found.");
+      console.log("Submitting final form data:", finalDataToSend);
 
-      console.log("Submitting final form data:", finalDataToSend); // Debug log
-
-      // Make the API call to update the branch with all edited data
       const { data: updatedBranchData } = await axios.post(
         updateBranchRoute(branch._id, userId),
         finalDataToSend,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       console.log('Branch data updated successfully via form submit.');
 
-      // Update the main branch state with the response from the server
+      // Update main state and formData state (convert arrays back for inputs)
       setBranch(updatedBranchData);
-
-      // Update formData to reflect the saved state (including array-to-string conversion for inputs)
       setFormData({
           ...updatedBranchData,
           programs_offered: Array.isArray(updatedBranchData.programs_offered) ? updatedBranchData.programs_offered.join(', ') : '',
           image_gallery: Array.isArray(updatedBranchData.image_gallery) ? updatedBranchData.image_gallery.join(', ') : '',
       });
 
-      setIsEditing(false); // Exit edit mode
+      setIsEditing(false);
     } catch (error) {
       console.error('Error updating branch data via form submit:', error);
       setError("Failed to save branch data. Please try again.");
-      // Optionally: Provide more specific error feedback based on error response
     }
   };
 
@@ -277,29 +237,24 @@ const BranchData = ({ userId }) => {
   if (isLoading) {
       return <div className="text-center p-6">Loading branch data...</div>;
   }
-
-  // Display error if any occurred during loading or saving
-  if (error) {
-      // You might want a more sophisticated error display (e.g., a toast notification)
-      return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error:</strong>
-          <span className="block sm:inline"> {error}</span>
-      </div>;
-  }
-
-  // Display if no branch is assigned/found after loading
-  if (!branch._id && !isLoading) {
+  if (!branch._id && !isLoading && !error) {
        return <div className="bg-cream p-6 rounded-lg shadow-lg text-brown">
            <h1 className="text-2xl font-bold text-center">No branch data available or assigned.</h1>
-           {/* Optionally add a button or link here for admins to assign/create one */}
        </div>;
   }
 
   return (
     <div className="bg-cream p-6 rounded-lg shadow-lg text-brown">
+       {/* Display loading/error states first if they occurred */}
+        {error && (
+             <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Error:</strong>
+                <span className="block sm:inline"> {error}</span>
+             </div>
+        )}
+
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">{isEditing ? formData.name : branch.name || 'Branch Name'}</h1>
-         {/* Only show edit button if branch exists */}
         {branch._id && (
              <button
                 onClick={handleEditClick}
@@ -314,8 +269,25 @@ const BranchData = ({ userId }) => {
       {!isEditing ? (
         // --- Display Mode ---
         <div>
-          <p className="text-lg mb-2">Location: {branch.location || 'N/A'}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Contact Info Section */}
+          <div className="mb-6 border-b border-light-brown pb-4">
+              <h2 className="font-semibold text-xl mb-3">Contact Information</h2>
+              <div className="flex items-center mb-2">
+                  <FaMapMarkerAlt className="mr-3 text-brown" />
+                  <span>{branch.location || 'N/A'}</span>
+              </div>
+              <div className="flex items-center mb-2">
+                  <FaPhone className="mr-3 text-brown" />
+                  <span>{branch.phone || 'N/A'}</span>
+              </div>
+              <div className="flex items-center">
+                  <FaEnvelope className="mr-3 text-brown" />
+                  <span>{branch.email || 'N/A'}</span>
+              </div>
+          </div>
+
+          {/* Ratings & Programs Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h2 className="font-semibold text-xl mb-2">Ratings</h2>
               <p>Academic: {branch.academic_rating || 'N/A'}</p>
@@ -338,18 +310,18 @@ const BranchData = ({ userId }) => {
               </ul>
             </div>
           </div>
+
+          {/* Image Gallery Section */}
           <div>
             <h2 className="font-semibold text-xl mb-2">Image Gallery</h2>
-            <div className="h-55"> {/* Consider using a fixed height container if needed */}
+            <div className="h-55">
               {branch.image_gallery && branch.image_gallery.length > 0 ? (
-                <div className="flex space-x-4 overflow-x-auto h-48 pb-2"> {/* Added padding-bottom */}
+                <div className="flex space-x-4 overflow-x-auto h-48 pb-2">
                   {branch.image_gallery.map((image, index) => (
                     <img
-                      key={index}
-                      src={image}
-                      alt={`Gallery ${index + 1}`}
-                      className="h-full w-auto object-cover rounded flex-shrink-0 border border-gray-300" // Added border
-                      loading="lazy" // Lazy load images
+                      key={index} src={image} alt={`Gallery ${index + 1}`}
+                      className="h-full w-auto object-cover rounded flex-shrink-0 border border-gray-300"
+                      loading="lazy"
                     />
                   ))}
                 </div>
@@ -362,67 +334,55 @@ const BranchData = ({ userId }) => {
       ) : (
         // --- Edit Mode ---
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Display error specific to saving */}
-          {error && <div className="text-red-600">{error}</div>}
+          {/* Display save error specific to form if any */}
+          {error && isEditing && <div className="text-red-600">{error}</div>}
+
+          {/* Basic Info Fields */}
           <div>
             <label htmlFor="name" className="block font-semibold mb-1">Name:</label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              value={formData.name || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50"
-            />
+            <input id="name" type="text" name="name" value={formData.name || ''} onChange={handleChange}
+                   className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" />
           </div>
           <div>
             <label htmlFor="location" className="block font-semibold mb-1">Location:</label>
-            <input
-              id="location"
-              type="text"
-              name="location"
-              value={formData.location || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50"
-            />
+            <input id="location" type="text" name="location" value={formData.location || ''} onChange={handleChange}
+                   className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" />
           </div>
+          {/* Added Phone Field */}
           <div>
-            {/* Use textarea for better editing experience with lists */}
+            <label htmlFor="phone" className="block font-semibold mb-1">Phone:</label>
+            <input id="phone" type="tel" name="phone" value={formData.phone || ''} onChange={handleChange}
+                   className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" />
+          </div>
+           {/* Added Email Field */}
+          <div>
+            <label htmlFor="email" className="block font-semibold mb-1">Email:</label>
+            <input id="email" type="email" name="email" value={formData.email || ''} onChange={handleChange}
+                   className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" />
+          </div>
+
+          {/* Array Fields */}
+          <div>
             <label htmlFor="programs_offered" className="block font-semibold mb-1">Programs Offered (comma-separated):</label>
-            <textarea
-              id="programs_offered"
-              name="programs_offered"
-              value={formData.programs_offered || ''} // Ensure controlled component using the string form
-              onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50"
-              rows="4"
-            />
+            <textarea id="programs_offered" name="programs_offered" value={formData.programs_offered || ''} onChange={handleChange}
+                      className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" rows="4" />
              <p className="text-xs text-gray-500 mt-1">Changes are auto-saved shortly after you type a comma.</p>
           </div>
           <div>
             <label htmlFor="image_gallery" className="block font-semibold mb-1">Image Gallery (comma-separated URLs):</label>
-             <textarea
-              id="image_gallery"
-              name="image_gallery"
-              value={formData.image_gallery || ''} // Ensure controlled component using the string form
-              onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50"
-              rows="4"
-            />
+             <textarea id="image_gallery" name="image_gallery" value={formData.image_gallery || ''} onChange={handleChange}
+                       className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown focus:ring-opacity-50" rows="4" />
              <p className="text-xs text-gray-500 mt-1">Changes are auto-saved shortly after you type a comma.</p>
           </div>
-          <div className="flex justify-end"> {/* Align button to the right */}
-            <button
-                type="button" // Cancel button
-                onClick={handleEditClick}
-                className="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 transition mr-2"
-            >
+
+          {/* Action Buttons */}
+          <div className="flex justify-end pt-2">
+            <button type="button" onClick={handleEditClick}
+                    className="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600 transition mr-2">
                 <FaTimes className="inline-block mr-1" /> Cancel
             </button>
-            <button
-              type="submit"
-              className="bg-brown text-white px-4 py-2 rounded shadow hover:bg-light-brown transition"
-            >
+            <button type="submit"
+                    className="bg-brown text-white px-4 py-2 rounded shadow hover:bg-light-brown transition">
               <FaCheck className="inline-block mr-1"/> Save Changes
             </button>
           </div>
