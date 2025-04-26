@@ -95,6 +95,7 @@ const BranchData = ({ userId }) => {
                 image_gallery: Array.isArray(branchDeets.image_gallery) ? branchDeets.image_gallery.join(', ') : '',
                 // phone and email should already be strings from fetchBranch
             });
+            console.log(branchDeets);
           } else {
               setError("Branch details found but could not be loaded.");
           }
