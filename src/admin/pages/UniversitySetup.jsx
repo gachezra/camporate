@@ -7,6 +7,7 @@ import {
   getUniversityNamesRoute, 
   schoolEmailRoute 
 } from '../../utils/APIRoutes';
+import { FaUniversity, FaBuilding, FaEnvelope, FaPlus, FaSave, FaTimes } from 'react-icons/fa';
 
 const UniversitySetup = () => {
   const [universities, setUniversities] = useState([]);
@@ -98,13 +99,11 @@ const UniversitySetup = () => {
       return;
     }
 
-    // Add branch to the university data (for new university)
     setUniversityData({
       ...universityData,
       branches: [...universityData.branches, { ...newBranch }]
     });
     
-    // Reset the new branch form
     setNewBranch({ name: '', location: '' });
     
     setNotification({
@@ -113,7 +112,6 @@ const UniversitySetup = () => {
     });
   };
 
-  // Add branch to existing university
   const handleAddBranchToExisting = async () => {
     if (!newBranch.name.trim() || !newBranch.location.trim()) {
       setNotification({
@@ -179,7 +177,6 @@ const UniversitySetup = () => {
         isError: false
       });
       
-      // Reset form and fetch updated list of universities
       setUniversityData({
         name: '',
         description: '',
@@ -239,34 +236,41 @@ const UniversitySetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-700 p-6">
+    <div className="min-h-screen bg-cream text-gray-700 p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="bg-blue-600 p-4 text-white">
-          <h1 className="text-2xl font-bold">University Setup</h1>
+        <div className="bg-brown p-4 text-cream">
+          <h1 className="text-2xl font-bold flex items-center">
+            <FaUniversity className="mr-2" />
+            University Setup
+          </h1>
         </div>
         
         {notification.message && (
-          <div className={`p-4 ${notification.isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div className={`p-4 ${notification.isError ? 'bg-brown bg-opacity-10 text-brown' : 'bg-blue-100 text-blue-700'} rounded-md mx-6 mt-4`}>
             {notification.message}
           </div>
         )}
         
         {isLoading && (
-          <div className="p-4 text-center text-blue-600">
+          <div className="p-4 text-center text-light-brown">
             Loading...
           </div>
         )}
         
         <div className="p-6">
           {!isAddingNewUniversity ? (
-            <div>
-              <div className="mb-6">
-                <label className="block mb-2 font-medium">Select University</label>
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-2 font-medium text-light-brown flex items-center">
+                  <FaUniversity className="mr-2" />
+                  Select University
+                </label>
                 <select
                   value={selectedUniversity}
                   onChange={handleUniversityChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                   disabled={isLoading}
+                  aria-label="Select University"
                 >
                   <option value="">-- Select University --</option>
                   {universities.map(university => (
@@ -278,14 +282,18 @@ const UniversitySetup = () => {
               </div>
 
               {selectedUniversity && (
-                <div className="mb-6 border-t pt-4">
-                  <div className="mb-4">
-                    <label className="block mb-2 font-medium">Select Branch</label>
+                <div className="border-t border-gray-200 pt-4 space-y-6">
+                  <div>
+                    <label className="block mb-2 font-medium text-light-brown flex items-center">
+                      <FaBuilding className="mr-2" />
+                      Select Branch
+                    </label>
                     <select
                       value={selectedBranch}
                       onChange={(e) => setSelectedBranch(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                       disabled={isLoading}
+                      aria-label="Select Branch"
                     >
                       <option value="">-- Select Branch --</option>
                       {branches.map(branch => (
@@ -297,28 +305,43 @@ const UniversitySetup = () => {
                   </div>
 
                   {selectedBranch && (
-                    <div className="mb-4">
-                      <label className="block mb-2 font-medium">School Email</label>
-                      <input
-                        type="email"
-                        value={schoolEmail}
-                        onChange={(e) => setSchoolEmail(e.target.value)}
-                        placeholder="Enter School Email"
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={isLoading}
-                      />
+                    <div>
+                      <label className="block mb-2 font-medium text-light-brown flex items-center">
+                        <FaEnvelope className="mr-2" />
+                        School Email
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={schoolEmail}
+                          onChange={(e) => setSchoolEmail(e.target.value)}
+                          placeholder="Enter School Email"
+                          className="w-full p-2 pl-10 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
+                          disabled={isLoading}
+                          aria-label="School Email"
+                        />
+                        <FaEnvelope className="absolute left-3 top-3 text-light-brown" />
+                      </div>
                       <button
                         onClick={handleAddAdmin}
-                        className={`mt-3 px-4 py-2 rounded text-white ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        className={`mt-3 px-4 py-2 rounded text-cream flex items-center ${
+                          isLoading 
+                            ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                            : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                        }`}
                         disabled={isLoading}
                       >
+                        <FaPlus className="mr-2" />
                         {isLoading ? 'Adding...' : 'Add University Admin'}
                       </button>
                     </div>
                   )}
 
-                  <div className="mt-6 border-t pt-4">
-                    <h3 className="text-lg font-semibold mb-3">Add New Branch to University</h3>
+                  <div className="border-t border-gray-200 pt-4">
+                    <h3 className="text-lg font-semibold text-brown mb-3 flex items-center">
+                      <FaBuilding className="mr-2" />
+                      Add New Branch to University
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <input
                         type="text"
@@ -326,8 +349,9 @@ const UniversitySetup = () => {
                         value={newBranch.name}
                         onChange={handleNewBranchChange}
                         placeholder="Branch Name"
-                        className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                         disabled={isLoading}
+                        aria-label="Branch Name"
                       />
                       <input
                         type="text"
@@ -335,94 +359,122 @@ const UniversitySetup = () => {
                         value={newBranch.location}
                         onChange={handleNewBranchChange}
                         placeholder="Branch Location"
-                        className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                         disabled={isLoading}
+                        aria-label="Branch Location"
                       />
                     </div>
                     <button
                       onClick={handleAddBranchToExisting}
-                      className={`px-4 py-2 rounded text-white ${isLoading ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                      className={`px-4 py-2 rounded text-cream flex items-center ${
+                        isLoading 
+                          ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                          : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                      }`}
                       disabled={isLoading}
                     >
+                      <FaPlus className="mr-2" />
                       {isLoading ? 'Adding...' : 'Add Branch'}
                     </button>
                   </div>
                 </div>
               )}
               
-              <div className="mt-6 border-t pt-4">
+              <div className="border-t border-gray-200 pt-4">
                 <button
                   onClick={() => {
                     setIsAddingNewUniversity(true);
                     setNotification({ message: '', isError: false });
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className={`px-4 py-2 rounded text-cream flex items-center ${
+                    isLoading 
+                      ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                      : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                  }`}
                   disabled={isLoading}
                 >
+                  <FaPlus className="mr-2" />
                   Add New University
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSaveUniversity} className="space-y-4">
+            <form onSubmit={handleSaveUniversity} className="space-y-6">
               <div>
-                <label className="block mb-2 font-medium">University Name *</label>
+                <label className="block mb-2 font-medium text-light-brown flex items-center">
+                  <FaUniversity className="mr-2" />
+                  University Name *
+                </label>
                 <input
                   type="text"
                   name="name"
                   value={universityData.name}
                   onChange={handleUniversityDataChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                   required
                   disabled={isLoading}
+                  aria-label="University Name"
                 />
               </div>
               
               <div>
-                <label className="block mb-2 font-medium">Description</label>
+                <label className="block mb-2 font-medium text-light-brown flex items-center">
+                  Description
+                </label>
                 <textarea
                   name="description"
                   value={universityData.description}
                   onChange={handleUniversityDataChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                   rows="3"
                   disabled={isLoading}
+                  aria-label="University Description"
                 ></textarea>
               </div>
               
               <div>
-                <label className="block mb-2 font-medium">Website</label>
+                <label className="block mb-2 font-medium text-light-brown flex items-center">
+                  Website
+                </label>
                 <input
                   type="url"
                   name="website"
                   value={universityData.website}
                   onChange={handleUniversityDataChange}
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                   disabled={isLoading}
+                  aria-label="University Website"
                 />
               </div>
               
               <div>
-                <label className="block mb-2 font-medium">Email Domain for Verification *</label>
+                <label className="block mb-2 font-medium text-light-brown flex items-center">
+                  <FaEnvelope className="mr-2" />
+                  Email Domain for Verification *
+                </label>
                 <input
                   type="text"
                   name="emailDomain"
                   value={universityData.emailDomain}
                   onChange={handleUniversityDataChange}
                   placeholder="e.g., university.edu"
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                   required
                   disabled={isLoading}
+                  aria-label="Email Domain"
                 />
               </div>
               
-              <div className="border-t pt-4">
-                <h2 className="text-xl font-semibold mb-3">Branches</h2>
+              <div className="border-t border-gray-200 pt-4">
+                <h2 className="text-xl font-semibold text-brown mb-3 flex items-center">
+                  <FaBuilding className="mr-2" />
+                  Branches
+                </h2>
                 
                 {universityData.branches.length > 0 && (
-                  <div className="mb-4 bg-gray-50 p-3 rounded">
-                    <h3 className="font-medium mb-2">Added Branches:</h3>
-                    <ul className="list-disc pl-5">
+                  <div className="mb-4 bg-cream p-4 rounded-md border border-light-brown">
+                    <h3 className="font-medium text-light-brown mb-2">Added Branches:</h3>
+                    <ul className="list-disc pl-5 text-gray-700">
                       {universityData.branches.map((branch, index) => (
                         <li key={index}>
                           {branch.name} - {branch.location}
@@ -432,7 +484,7 @@ const UniversitySetup = () => {
                   </div>
                 )}
                 
-                <div className="border border-gray-200 p-4 rounded">
+                <div className="border border-light-brown p-4 rounded-md">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <input
                       type="text"
@@ -440,8 +492,9 @@ const UniversitySetup = () => {
                       value={newBranch.name}
                       onChange={handleNewBranchChange}
                       placeholder="Branch Name"
-                      className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                       disabled={isLoading}
+                      aria-label="New Branch Name"
                     />
                     <input
                       type="text"
@@ -449,27 +502,38 @@ const UniversitySetup = () => {
                       value={newBranch.location}
                       onChange={handleNewBranchChange}
                       placeholder="Branch Location"
-                      className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors disabled:opacity-50"
                       disabled={isLoading}
+                      aria-label="New Branch Location"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={addBranchToUniversity}
-                    className={`px-4 py-2 rounded text-white ${isLoading ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                    className={`px-4 py-2 rounded text-cream flex items-center ${
+                      isLoading 
+                        ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                        : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                    }`}
                     disabled={isLoading}
                   >
+                    <FaPlus className="mr-2" />
                     Add Branch
                   </button>
                 </div>
               </div>
               
-              <div className="flex gap-4 pt-4 border-t">
+              <div className="flex gap-4 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className={`px-4 py-2 rounded text-white ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                  className={`px-4 py-2 rounded text-cream flex items-center ${
+                    isLoading 
+                      ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                      : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                  }`}
                   disabled={isLoading}
                 >
+                  <FaSave className="mr-2" />
                   {isLoading ? 'Saving...' : 'Save University'}
                 </button>
                 <button
@@ -485,9 +549,14 @@ const UniversitySetup = () => {
                     });
                     setNotification({ message: '', isError: false });
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                  className={`px-4 py-2 rounded text-cream flex items-center ${
+                    isLoading 
+                      ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                      : 'bg-light-brown-dark hover:bg-brown hover:text-cream border border-light-brown-dark hover:border-brown'
+                  }`}
                   disabled={isLoading}
                 >
+                  <FaTimes className="mr-2" />
                   Cancel
                 </button>
               </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { loginRoute, registerRoute } from '../../utils/APIRoutes';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,6 @@ const AdminLogin = () => {
     
     try {
       if (isRegistering) {
-        // Register the user
         const response = await axios.post(registerRoute, {
           username: formData.username,
           email: formData.email,
@@ -49,7 +49,6 @@ const AdminLogin = () => {
         
         setNotification(response.data.message);
       } else {
-        // Login the user
         const response = await axios.post(loginRoute, {
           email: formData.email,
           password: formData.password
@@ -72,12 +71,13 @@ const AdminLogin = () => {
     setIsRegistering(!isRegistering);
     setError('');
     setNotification('');
+    setFormData({ email: '', password: '', confirmPassword: '', username: '' });
   };
 
   return (
-    <div className="flex h-screen bg-cream text-brown items-center justify-center">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-center text-3xl font-bold mb-6 text-blue-600">
+    <div className="flex h-screen bg-cream items-center justify-center px-4">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-center text-3xl font-bold mb-6 text-brown">
           {isRegistering ? 'Admin Registration' : 'Admin Login'}
         </h1>
         
@@ -88,78 +88,98 @@ const AdminLogin = () => {
         )}
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="mb-4 p-3 bg-brown bg-opacity-10 text-brown rounded-md">
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {isRegistering && (
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="username" className="block text-sm font-medium text-light-brown mb-1">
                 Full Name
               </label>
-              <input
-                type="text"
-                id="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required={isRegistering}
-              />
+              <div className="relative">
+                <FaUser className="absolute left-3 top-3 text-light-brown" />
+                <input
+                  type="text"
+                  id="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors"
+                  required={isRegistering}
+                  placeholder="Enter your full name"
+                  aria-label="Full Name"
+                />
+              </div>
             </div>
           )}
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-light-brown mb-1">
               Email
             </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div className="relative">
+              <FaEnvelope className="absolute left-3 top-3 text-light-brown" />
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors"
+                required
+                placeholder="Enter your email"
+                aria-label="Email"
+              />
+            </div>
           </div>
           
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-light-brown mb-1">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div className="relative">
+              <FaLock className="absolute left-3 top-3 text-light-brown" />
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors"
+                required
+                placeholder="Enter your password"
+                aria-label="Password"
+              />
+            </div>
           </div>
           
           {isRegistering && (
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-light-brown mb-1">
                 Confirm Password
               </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <div className="relative">
+                <FaLock className="absolute left-3 top-3 text-light-brown" />
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border border-light-brown rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown focus:border-light-brown-dark transition-colors"
+                  required
+                  placeholder="Confirm your password"
+                  aria-label="Confirm Password"
+                />
+              </div>
             </div>
           )}
           
           <button
             type="submit"
-            className={`w-full px-4 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-4 py-2 text-cream rounded-md focus:outline-none focus:ring-2 focus:ring-light-brown transition-colors ${
               isLoading 
-                ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700'
+                ? 'bg-light-brown cursor-not-allowed opacity-50' 
+                : 'bg-brown hover:bg-light-brown hover:text-cream border border-light-brown-dark hover:border-brown'
             }`}
             disabled={isLoading}
           >
@@ -171,7 +191,7 @@ const AdminLogin = () => {
           <div className="text-center">
             <button
               onClick={toggleMode}
-              className="text-blue-600 hover:underline text-sm"
+              className="text-light-brown hover:text-brown hover:underline text-sm transition-colors"
             >
               {isRegistering 
                 ? 'Already have an account? Login' 
