@@ -77,6 +77,7 @@ const UniversityManagement = ({ userId }) => {
       try {
         const uni = await fetchUniId();
         const uniDetails = await fetchUni(uni);
+        console.log(uniDetails)
         setUniversity(uniDetails);
         setEditForm({
           name: uniDetails.name || '',
