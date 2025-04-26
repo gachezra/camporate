@@ -47,11 +47,7 @@ const BranchData = ({ userId }) => {
             headers: { Authorization: `Bearer ${token}` },
         });
         // Ensure default empty strings if data is missing
-        return {
-            ...data,
-            phone: data.phone || '',
-            email: data.email || '',
-        };
+        return {data};
     } catch (err) {
         console.error("Error fetching branch details:", err);
         setError("Failed to fetch branch details.");
@@ -95,7 +91,6 @@ const BranchData = ({ userId }) => {
                 image_gallery: Array.isArray(branchDeets.image_gallery) ? branchDeets.image_gallery.join(', ') : '',
                 // phone and email should already be strings from fetchBranch
             });
-            console.log(branchDeets);
           } else {
               setError("Branch details found but could not be loaded.");
           }
