@@ -22,6 +22,7 @@ export const getUniversityByIdRoute = `${API_BASE_URL}/universities`
 export const getUniversityNamesRoute = `${API_BASE_URL}/dropdown-universities`
 export const schoolEmailRoute = `${API_BASE_URL}/school-email`
 export const addUniversityRoute = `${API_BASE_URL}/universities`
+export const updateUniversityRoute = (universityId) => `${API_BASE_URL}/universities/${universityId}`
 
 //branches
 export const getBranchesRoute = (universityId) => `${API_BASE_URL}/branches/${universityId}/branches`

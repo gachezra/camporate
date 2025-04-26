@@ -50,7 +50,7 @@ const PostSection = ({ posts, userId, onCreatePost, onVote, onEdit, onDelete, on
     const isReplying = activeReplyPostId === post._id;
     const hasReplies = post.replies && post.replies.length > 0;
     const isShowingReplies = showReplies[post._id];
-    const isAuthor = post.author._id?.includes(userId);
+    const isAuthor = post.author?._id?.includes(userId);
 
     return (
       <div key={post._id} className={`pl-${Math.min(level + 2)}`}>
@@ -68,7 +68,7 @@ const PostSection = ({ posts, userId, onCreatePost, onVote, onEdit, onDelete, on
           </div>
           <div className="bg-cream rounded-bl-md mb-1 p-3 shadow-md flex-1">
             <div className="flex justify-between items-center">
-              <p className="font-semibold text-brown-dark">{post.author.username}</p>
+              <p className="font-semibold text-brown-dark">{post.author?.username}</p>
               <div className="flex space-x-2 text-brown-dark">
                 {isAuthor && (
                   <>

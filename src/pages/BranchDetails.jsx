@@ -32,7 +32,7 @@ const BranchDetails = () => {
         axios.get(reviewRoute(universityId, branchId))
       ]);
 
-      console.log(branchResponse.data, reviewsResponse.data)
+      console.log(branchResponse.data, reviewsResponse.data);
 
       setBranch(branchResponse.data);
       setReviews(reviewsResponse.data);
@@ -60,11 +60,11 @@ const BranchDetails = () => {
   const handleWriteReview = () => setIsReviewFormOpen(true);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">
-      <Lottie
-        animationData={animationData}
-      />
-  </div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Lottie animationData={animationData} />
+      </div>
+    );
   }
 
   if (error) return <div className="flex justify-center items-center h-screen text-xl font-semibold text-gray-700">{error}</div>;
@@ -84,7 +84,7 @@ const BranchDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col space-y-4">
               <p className="flex items-center"><FaMapMarkerAlt className="text-brown mr-2" />{branch.location}</p>
-              <p className="flex items-center"><FaPhone className="text-brown mr-2" />{branch.phone}</p>
+              <p className="flex items-center"><FaPhone className="text-brown mr-2" />{branch.contact}</p>
               <p className="flex items-center"><FaEnvelope className="text-brown mr-2" />
                 <a href={`mailto:${branch.email}`} className="text-blue-500 underline">{branch.email}</a>
               </p>
@@ -139,7 +139,6 @@ const BranchDetails = () => {
           </div>
         )}
 
-
         {isReviewFormOpen && (
           <ReviewForm
             universityId={universityId}
@@ -152,25 +151,24 @@ const BranchDetails = () => {
           {isStudent && (
             <>
               <button
-              onClick={handleWriteReview}
-              className="bg-brown text-white px-4 py-2 rounded-xl font-semibold shadow-md hover:bg-light-brown transition duration-300 flex items-center"
+                onClick={handleWriteReview}
+                className="bg-brown text-white px-4 py-2 rounded-xl font-semibold shadow-md hover:bg-light-brown transition duration-300 flex items-center"
               >
-              <TfiWrite size={15} title='Write a review' className="mr-2" />
-              Write a Review
+                <TfiWrite size={15} title='Write a review' className="mr-2" />
+                Write a Review
               </button>
 
               <Link to='/forums'>
                 <button
-                    className="bg-brown text-white px-4 py-2 rounded-xl font-semibold shadow-md hover:bg-light-brown transition duration-300 flex items-center"
+                  className="bg-brown text-white px-4 py-2 rounded-xl font-semibold shadow-md hover:bg-light-brown transition duration-300 flex items-center"
                 >
-                    <MdOutlineRateReview size={15} title='Find forums' className="mr-2" />
-                    Find Forums
+                  <MdOutlineRateReview size={15} title='Find forums' className="mr-2" />
+                  Find Forums
                 </button>
               </Link>
             </>
           )}
         </div>
-
 
         {/* Review Section */}
         <div className="flex justify-between items-center mb-6">
@@ -199,40 +197,45 @@ const BranchDetails = () => {
         <div className="space-y-6">
           {filteredReviews.length > 0 ? (
             filteredReviews.map((review, index) => (
-            <div key={index} className="p-5 bg-white rounded-lg shadow-lg border border-gray-200">
+              <div key={index} className="p-5 bg-white rounded-lg shadow-lg border border-gray-200">
                 {/* Header with overall rating, date, and username */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
-                    <p className="font-bold text-lg sm:text-xl text-brown">
+                  <p className="font-bold text-lg sm:text-xl text-brown">
                     Overall Rating: ⭐ {review.overall_rating?.toFixed(1)}/10
-                    </p>
-                    <div className="text-sm text-gray-500 space-y-1 sm:space-y-0 sm:ml-4">
+                  </p>
+                  <div className="text-sm text-gray-500 space-y-1 sm:space-y-0 sm:ml-4">
                     <p>Posted on: {new Date(review.date).toLocaleDateString()}</p>
                     <p>By: {review.user_id?.username}</p>
-                    </div>
+                  </div>
                 </div>
 
                 {/* Ratings section */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <p><strong>Academic:</strong> ⭐ {review.academic_rating.toFixed(1)}/10</p>
-                    <p><strong>Facilities:</strong> ⭐ {review.facilities_rating.toFixed(1)}/10</p>
-                    <p><strong>Social Life:</strong> ⭐ {review.social_life_rating.toFixed(1)}/10</p>
-                    <p><strong>Career Prospects:</strong> ⭐ {review.career_prospects_rating.toFixed(1)}/10</p>
-                    <p><strong>Cost of Living:</strong>Ksh.{review.cost_of_living} per day</p>
+                  <p><strong>Academic:</strong> ⭐ {review.academic_rating.toFixed(1)}/10</p>
+                  <p><strong>Facilities:</strong> ⭐ {review.facilities_rating.toFixed(1)}/10</p>
+                  <p><strong>Social Life:</strong> ⭐ {review.social_life_rating.toFixed(1)}/10</p>
+                  <p><strong>Career Prospects:</strong> ⭐ {review.career_prospects_rating.toFixed(1)}/10</p>
+                  <p><strong>Cost of Living:</strong> Ksh.{review.cost_of_living} per day</p>
                 </div>
 
                 {/* Review comment */}
                 <p className="mt-4 text-base sm:text-lg text-brown">{review.comment}</p>
 
-                {/* response */}
-                {review.responses && (
+                {/* Responses */}
+                {Array.isArray(review.responses) && review.responses.length > 0 ? (
                   <div>
-                    <p className='mb-3 text-lg mt-4 font-bold'>Response</p>
-                    <p className="text-gray-700">By admin.</p>
-                    <p className="text-gray-700">{review.responses[0].response}</p>
+                    <p className="mb-3 text-lg mt-4 font-bold">Responses</p>
+                    {review.responses.map((response, idx) => (
+                      <div key={idx} className="mt-2">
+                        <p className="text-gray-700">By admin</p>
+                        <p className="text-gray-700">{response.response}</p>
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <p className="mt-4 text-gray-700">No responses yet.</p>
                 )}
-            </div>
-
+              </div>
             ))
           ) : (
             <p className="text-center text-gray-700">No reviews available.</p>

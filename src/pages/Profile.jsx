@@ -215,11 +215,11 @@ const Profile = () => {
                 key={thread._id}
                 className="bg-cream-light p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
               >
-                <Link to={`/forums/${thread._id}`}>
+                <Link to={`/forums`}>
                   <h3 className="text-xl font-semibold text-brown-dark">{thread.title}</h3>
                   <p className="text-brown mt-2">{thread.content}</p>
                   <p className="text-sm text-brown-light mt-1">
-                    Posted by {thread.author.username} | {new Date(thread.createdAt).toLocaleString()}
+                    Posted by {thread.author?.username} | {new Date(thread.createdAt).toLocaleString()}
                   </p>
                 </Link>
               </div>

@@ -1,409 +1,213 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaEdit, FaCheck, FaTimes, FaSpinner, FaUniversity, FaGlobe, FaEnvelope } from 'react-icons/fa';
-import { getUserProfileRoute, getUniversityDetails, getBranchesRoute } from '../../utils/APIRoutes';
+import { FaEdit, FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
+import { getUserProfileRoute, getUniversityDetails, getBranchesRoute, updateUniversityRoute } from '../../utils/APIRoutes';
 
 const UniversityManagement = ({ userId }) => {
   const [university, setUniversity] = useState({
-    name: '',
-    location: '',
-    academic_rating: 0,
-    career_prospects_rating: 0,
-    cost_of_living: 0,
-    facilities_rating: 0,
-    overall_rating: 0,
-    programs_offered: [],
-    social_life_rating: '',
-    branches: [],
-    website: '',
-    description: '',
-    emailDomain: ''
+    _id: '', name: '', description: '', website: '', emailDomain: '',
+    academic_rating: 0, career_prospects_rating: 0, cost_of_living: 0,
+    facilities_rating: 0, overall_rating: 0, programs_offered: [], social_life_rating: '', branches: [],
   });
-  const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: '',
-    location: '',
-    description: '',
-    website: '',
-    emailDomain: '',
+    name: '', description: '', website: '', emailDomain: '',
+    programs_offered: '',
   });
   const [branchDetails, setBranchDetails] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
- 
-  const fetchUni = useCallback(async (uni) => {
+
+  const fetchUni = useCallback(async (uniId) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error("Authentication token not found");
-      
-      const response = await axios.get(`${getUniversityDetails}/${uni}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!token) throw new Error('Authentication required');
+      const { data } = await axios.get(`${getUniversityDetails}/${uniId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to fetch university details");
+      return data;
+    } catch (err) {
+      throw new Error('Failed to fetch university details');
     }
   }, []);
 
   const fetchUniId = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error("Authentication token not found");
-      
-      const response = await axios.get(`${getUserProfileRoute}/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!token) throw new Error('Authentication required');
+      const { data } = await axios.get(`${getUserProfileRoute}/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
-      return response.data.universities.map(university => university.university);
-    } catch (error) {
-      throw new Error("Failed to fetch user's university ID");
+      return data.universities?.[0]?.university || null;
+    } catch (err) {
+      throw new Error('Failed to fetch university ID');
     }
   }, [userId]);
 
-  const fetchBranchDetails = useCallback(async (uni) => {
+  const fetchBranchDetails = async (uniId) => {
     try {
-      const response = await axios.get(getBranchesRoute(uni));
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to fetch branch details");
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get(getBranchesRoute(uniId), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return data;
+    } catch (err) {
+      throw new Error('Failed to fetch branch details');
     }
-  }, []);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const uni = await fetchUniId();
-        const uniDetails = await fetchUni(uni);
-        console.log(uniDetails)
+    setIsLoading(true);
+    fetchUniId().then(async (uniId) => {
+      if (uniId) {
+        const [uniDetails, branches] = await Promise.all([
+          fetchUni(uniId),
+          fetchBranchDetails(uniId),
+        ]);
+        console.log('Fetched university details:', uniDetails);
+        console.log('Fetched branch details:', branches);
         setUniversity(uniDetails);
         setEditForm({
-          name: uniDetails.name || '',
-          location: uniDetails.location || '',
-          description: uniDetails.description || '',
-          website: uniDetails.website || '',
-          emailDomain: uniDetails.emailDomain || '',
+          name: uniDetails.name, description: uniDetails.description,
+          website: uniDetails.website, emailDomain: uniDetails.emailDomain,
+          programs_offered: uniDetails.programs_offered?.join(', ') || '',
         });
-        
-        const branches = await fetchBranchDetails(uni);
         setBranchDetails(branches);
-      } catch (err) {
-        setError(err.message || "An error occurred while fetching data");
-      } finally {
-        setIsLoading(false);
       }
-    };
-    
-    fetchData();
-  }, [fetchUni, fetchUniId, fetchBranchDetails]);
+    }).catch((err) => setError(err.message)).finally(() => setIsLoading(false));
+
+  }, [fetchUni, fetchUniId]);
+
+  const handleEdit = () => setIsEditing(true);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+
+    const programsArray = editForm.programs_offered.split(',').map((item) => item.trim()).filter(Boolean);
+    const payload = { ...editForm, programs_offered: programsArray };
+
     try {
-      // In a real implementation, send a PUT/PATCH request to update university details
-      // For now, just updating local state
-      setUniversity(prev => ({
-        ...prev,
-        ...editForm
-      }));
+      const token = localStorage.getItem('token');
+      const { data } = await axios.put(updateUniversityRoute(university._id), payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUniversity(data);
+      setEditForm({
+        ...data,
+        programs_offered: data.programs_offered?.join(', ') || '',
+      });
       setIsEditing(false);
     } catch (err) {
-      setError("Failed to update university details");
+      setError('Failed to update university details');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const renderRatingBar = (rating) => {
-    const value = parseFloat(rating) || 0;
-    return (
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div 
-          className="bg-brown h-2.5 rounded-full" 
-          style={{ width: `${(value / 5) * 100}%` }}
-        ></div>
-      </div>
-    );
-  };
-
   if (isLoading && !university.name) {
-    return (
-      <div className="bg-cream p-8 rounded-lg shadow-lg flex justify-center items-center h-64">
-        <FaSpinner className="animate-spin text-brown text-3xl" />
-        <p className="ml-3 text-lg">Loading university details...</p>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-64 bg-cream rounded-lg"><FaSpinner className="animate-spin text-brown text-3xl" /> <span className="ml-2 text-brown">Loading...</span></div>;
   }
 
   if (error && !university.name) {
     return (
-      <div className="bg-cream p-8 rounded-lg shadow-lg">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
-        </div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-brown text-cream rounded-lg hover:bg-light-brown transition-colors"
-        >
-          Try Again
-        </button>
+      <div className="bg-cream p-6 rounded-lg text-brown">
+        <p className="text-red-600">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 bg-brown text-cream px-4 py-2 rounded hover:bg-light-brown">Retry</button>
       </div>
     );
   }
 
   return (
-    <div className="bg-cream p-8 rounded-lg shadow-lg relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/70 flex justify-center items-center z-10 rounded-lg">
-          <FaSpinner className="animate-spin text-brown text-3xl" />
-        </div>
-      )}
-      
-      <div className="flex justify-between items-center mb-6 border-b border-light-brown pb-4">
-        <h2 className="text-2xl font-bold flex items-center">
-          <FaUniversity className="mr-2 text-brown" />
-          University Management
-        </h2>
-        {!isEditing && (
-          <button 
-            onClick={() => setIsEditing(true)} 
-            className="px-4 py-2 bg-brown text-cream rounded-lg hover:bg-light-brown transition-colors flex items-center"
-            disabled={isLoading}
-          >
-            <FaEdit className="mr-2" /> Edit Details
-          </button>
-        )}
-      </div>
+    <div className="bg-cream p-6 rounded-lg shadow-lg text-brown">
+      <h2 className="text-2xl font-semibold mb-6">University Details</h2>
+      {isLoading && <div className="absolute inset-0 bg-cream/70 flex justify-center items-center"><FaSpinner className="animate-spin text-brown text-3xl" /></div>}
       
       {!isEditing ? (
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Basic Information</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-gray-600 text-sm">University Name</p>
-                  <p className="font-medium text-lg">{university.name || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Main Campus Location</p>
-                  <p className="font-medium">{university.location || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Description</p>
-                  <p className="text-gray-800">{university.description || 'No description available'}</p>
-                </div>
-                <div className="flex items-center">
-                  <FaGlobe className="text-brown mr-2" />
-                  <p className="text-gray-600 text-sm">Website:</p>
-                  {university.website ? 
-                    <a href={university.website} className="ml-2 text-blue-600 hover:underline">{university.website}</a> : 
-                    <span className="ml-2">N/A</span>
-                  }
-                </div>
-                <div className="flex items-center">
-                  <FaEnvelope className="text-brown mr-2" />
-                  <p className="text-gray-600 text-sm">Email Domain:</p>
-                  <span className="ml-2">{university.emailDomain || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Programs Offered</h3>
-              {university.programs_offered && university.programs_offered.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {university.programs_offered.map((program, index) => (
-                    <span key={index} className="bg-light-brown bg-opacity-20 px-3 py-1 rounded-full text-sm">
-                      {program}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No programs listed</p>
-              )}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <p><strong>Name:</strong> {university.name || 'N/A'}</p>
+            <p><strong>Description:</strong> {university.description || 'N/A'}</p>
+            <p><strong>Website:</strong> {university.website ? <a href={university.website} className="text-blue-500 underline">{university.website}</a> : 'N/A'}</p>
+            <p><strong>Email Domain:</strong> {university.emailDomain || 'N/A'}</p>
           </div>
-          
-          <div>
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">University Ratings</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-700">Academic</span>
-                    <span className="font-medium">{university.academic_rating || 'N/A'}/5</span>
-                  </div>
-                  {renderRatingBar(university.academic_rating)}
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-700">Career Prospects</span>
-                    <span className="font-medium">{university.career_prospects_rating || 'N/A'}/5</span>
-                  </div>
-                  {renderRatingBar(university.career_prospects_rating)}
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-700">Facilities</span>
-                    <span className="font-medium">{university.facilities_rating || 'N/A'}/5</span>
-                  </div>
-                  {renderRatingBar(university.facilities_rating)}
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-700">Social Life</span>
-                    <span className="font-medium">{university.social_life_rating || 'N/A'}/5</span>
-                  </div>
-                  {renderRatingBar(university.social_life_rating)}
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-gray-700">Overall Rating</span>
-                    <span className="font-medium">{university.overall_rating || 'N/A'}/5</span>
-                  </div>
-                  {renderRatingBar(university.overall_rating)}
-                </div>
-                <div className="pt-2">
-                  <p className="text-gray-700">Cost of Living: <span className="font-medium">
-                    {university.cost_of_living ? `Ksh.${university.cost_of_living} per day` : 'Not specified'}
-                  </span></p>
-                </div>
-              </div>
-            </div>
-            
+          <div className="space-y-4">
+            <p><strong>Programs:</strong> {university.programs_offered?.length ? university.programs_offered.join(', ') : 'N/A'}</p>
+            <p><strong>Branches:</strong> {branchDetails?.length ? branchDetails.map(b => b.name).join(', ') : 'No branches'}</p>
             <div>
-              <h3 className="text-xl font-semibold mb-4">Campus Branches</h3>
-              {branchDetails && branchDetails.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <ul className="divide-y divide-gray-200">
-                    {branchDetails.map((branch, index) => (
-                      <li key={index} className="py-2">
-                        {branch.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No branches listed</p>
-              )}
+              <h3 className="font-semibold">Ratings</h3>
+              <p>Academic: {university.academic_rating || 'N/A'}</p>
+              <p>Career: {university.career_prospects_rating || 'N/A'}</p>
+              <p>Facilities: {university.facilities_rating || 'N/A'}</p>
+              <p>Social Life: {university.social_life_rating || 'N/A'}</p>
+              <p>Cost of Living: Ksh.{university.cost_of_living || 'N/A'}</p>
+              <p>Overall: {university.overall_rating || 'N/A'}</p>
             </div>
           </div>
+          <button onClick={handleEdit} className="mt-4 bg-brown text-cream px-4 py-2 rounded hover:bg-light-brown"><FaEdit className="inline mr-1" /> Edit</button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-              <p>{error}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {['name', 'website', 'emailDomain'].map((field) => (
+            <div key={field}>
+              <label htmlFor={field} className="block font-semibold capitalize">{field}</label>
+              <input
+                id={field}
+                type={field === 'emailDomain' ? 'text' : field === 'website' ? 'url' : 'text'}
+                name={field}
+                value={editForm[field]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown/50"
+                disabled={isLoading}
+              />
             </div>
-          )}
-          
+          ))}
           <div>
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="name">University Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={editForm.name}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-brown focus:ring-opacity-30 focus:border-brown"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="location">Main Campus Location</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={editForm.location}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-brown focus:ring-opacity-30 focus:border-brown"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="description">Description</label>
+            <label htmlFor="description" className="block font-semibold">Description</label>
             <textarea
               id="description"
               name="description"
               value={editForm.description}
               onChange={handleChange}
+              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown/50"
               rows="4"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-brown focus:ring-opacity-30 focus:border-brown"
               disabled={isLoading}
             />
           </div>
-          
           <div>
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="website">University Website</label>
-            <input
-              type="url"
-              id="website"
-              name="website"
-              value={editForm.website}
+            <label htmlFor="programs_offered" className="block font-semibold">Programs Offered (comma-separated)</label>
+            <textarea
+              id="programs_offered"
+              name="programs_offered"
+              value={editForm.programs_offered}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-brown focus:ring-opacity-30 focus:border-brown"
+              className="w-full p-2 border rounded border-gray-300 focus:border-brown focus:ring focus:ring-brown/50"
+              rows="3"
               disabled={isLoading}
-              placeholder="https://example.edu"
             />
           </div>
-          
-          <div>
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="emailDomain">Email Domain</label>
-            <input
-              type="text"
-              id="emailDomain"
-              name="emailDomain"
-              value={editForm.emailDomain}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-brown focus:ring-opacity-30 focus:border-brown"
-              disabled={isLoading}
-              placeholder="example.edu"
-            />
-          </div>
-          
-          <div className="flex space-x-4 pt-4">
-            <button 
-              type="submit" 
-              className="px-6 py-3 bg-brown text-cream rounded-lg hover:bg-light-brown transition-colors flex items-center"
-              disabled={isLoading}
-            >
-              {isLoading ? <FaSpinner className="animate-spin mr-2" /> : <FaCheck className="mr-2" />}
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
-            
+          {error && <p className="text-red-600">{error}</p>}
+          <div className="flex justify-end space-x-2">
             <button
               type="button"
-              className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center"
-              onClick={() => {
-                setIsEditing(false);
-                setError(null);
-                setEditForm({
-                  name: university.name || '',
-                  location: university.location || '',
-                  description: university.description || '',
-                  website: university.website || '',
-                  emailDomain: university.emailDomain || '',
-                });
-              }}
+              onClick={() => setIsEditing(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
               disabled={isLoading}
             >
-              <FaTimes className="mr-2" /> Cancel
+              <FaTimes className="inline mr-1" /> Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-brown text-white px-4 py-2 rounded hover:bg-light-brown"
+              disabled={isLoading}
+            >
+              {isLoading ? <FaSpinner className="animate-spin inline mr-1" /> : <FaCheck className="inline mr-1" />}
+              {isLoading ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>

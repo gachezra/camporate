@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { IoIosArrowRoundBack } from 'react-icons/io';
 import PostSection from './PostSection';
@@ -42,6 +43,8 @@ const ForumPage = () => {
     newThreadDescription: ''
   });
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+  if (!userId) navigate('/');
 
   const fetchThreads = useCallback(async () => {
     try {
@@ -52,7 +55,7 @@ const ForumPage = () => {
           id: thread._id,
           title: thread.title,
           content: thread.content,
-          author: thread.author.username,
+          author: thread.author?.username,
           createdAt: thread.createdAt
         }))
       });

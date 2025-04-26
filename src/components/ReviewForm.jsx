@@ -14,6 +14,7 @@ const ReviewForm = ({ universityId, branchId, onClose }) => {
     cost_of_living: 100,
     comment: '',
   });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUniversityDetails = async () => {
@@ -35,6 +36,7 @@ const ReviewForm = ({ universityId, branchId, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await axios.post(reviewRoute(universityId, branchId), formData, {
         headers: {
@@ -42,9 +44,10 @@ const ReviewForm = ({ universityId, branchId, onClose }) => {
         }
       });
       setNotification('Review added successfully!');
+      setSubmitting(false);
       setTimeout(() => {
         onClose();
-      }, 2000); // Close the form after 2 seconds
+      }, 3000); // Close the form after 3 seconds
     } catch (error) {
       console.error('Error submitting review:', error);
       setNotification(error.response.data.error);
@@ -110,7 +113,6 @@ const ReviewForm = ({ universityId, branchId, onClose }) => {
           <label className="text-sm text-light-brown mb-1">Cost of Living(Ksh. per day):</label>
           <input
             type="number"
-            name="cost_of_living"
             min="1"
             value={formData.cost_of_living}
             onChange={handleChange}
@@ -127,12 +129,13 @@ const ReviewForm = ({ universityId, branchId, onClose }) => {
           />
           <button
             type="submit"
+            disabled={submitting}
             className="bg-light-brown text-cream border border-light-brown-dark hover:bg-cream hover:text-light-brown hover:border-light-brown-dark py-2 px-4 rounded mb-2 transition-colors duration-300"
           >
-            Submit
+            {submitting ? 'Submitting...' : 'Submit'}
           </button>
           <button
-            type="button"
+            type="submit"
             onClick={onClose}
             className="bg-light-brown-dark text-cream border border-brown hover:bg-cream hover:text-light-brown-dark hover:border-brown py-2 px-4 rounded transition-colors duration-300"
           >
